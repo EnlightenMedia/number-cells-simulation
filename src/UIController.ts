@@ -2,6 +2,7 @@ import { Grid } from './models/Grid';
 import { SimulationEngine } from './SimulationEngine';
 import { Cell } from './models/Cell';
 import { Food } from './models/Food';
+import { analytics } from './analytics';
 
 export class UIController {
   private grid: Grid | null = null;
@@ -152,6 +153,8 @@ export class UIController {
   }
 
   private initializeGrid(): void {
+    analytics.trackButtonClick('initialize');
+
     const height = parseInt(this.heightInput.value);
     const width = parseInt(this.widthInput.value);
     const foodCount = this.cannibalModeInput.checked ? 0 : parseInt(this.foodInput.value);
@@ -211,12 +214,26 @@ export class UIController {
       this.render();
       this.updateControlStates();
       this.showStatus('Grid initialized successfully', 'success');
+
+      analytics.trackGridInitialized({
+        height,
+        width,
+        foodCount,
+        cellCount,
+        maxValue,
+        energy,
+        cellsDie: this.cellsDieInput.checked,
+        allowRandomMove: this.allowRandomMoveInput.checked,
+        cannibalMode: this.cannibalModeInput.checked,
+      });
     } catch (error) {
       this.showStatus(`Error: ${(error as Error).message}`, 'error');
     }
   }
 
   private stepSimulation(): void {
+    analytics.trackButtonClick('step');
+
     if (!this.engine) {
       this.showStatus('Please initialize the grid first', 'error');
       return;
@@ -229,6 +246,8 @@ export class UIController {
   }
 
   private startSimulation(): void {
+    analytics.trackButtonClick('start');
+
     if (!this.engine) {
       this.showStatus('Please initialize the grid first', 'error');
       return;
@@ -243,9 +262,13 @@ export class UIController {
     this.engine.start(delay);
     this.updateControlStates();
     this.showStatus('Simulation started', 'success');
+
+    analytics.trackSimulationStarted(delay);
   }
 
   private stopSimulation(): void {
+    analytics.trackButtonClick('stop');
+
     if (!this.engine) {
       return;
     }
@@ -256,6 +279,8 @@ export class UIController {
   }
 
   private restartSimulation(): void {
+    analytics.trackButtonClick('reset');
+
     if (!this.engine || !this.grid) {
       this.showStatus('Please initialize the grid first', 'error');
       return;

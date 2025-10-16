@@ -1,5 +1,6 @@
 import { marked } from 'marked';
 import readmeContent from '../README.md?raw';
+import { analytics } from './analytics';
 
 export function initializeHelpModal(): void {
   const helpBtn = document.getElementById('help-btn');
@@ -17,15 +18,18 @@ export function initializeHelpModal(): void {
   modalContent.innerHTML = htmlContent as string;
 
   helpBtn.addEventListener('click', () => {
+    analytics.trackHelpOpened();
     helpModal.classList.add('active');
   });
 
   closeModal.addEventListener('click', () => {
+    analytics.trackHelpClosed('close_button');
     helpModal.classList.remove('active');
   });
 
   helpModal.addEventListener('click', (e) => {
     if (e.target === helpModal) {
+      analytics.trackHelpClosed('backdrop_click');
       helpModal.classList.remove('active');
     }
   });
@@ -33,6 +37,7 @@ export function initializeHelpModal(): void {
   // Close modal on Escape key
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && helpModal.classList.contains('active')) {
+      analytics.trackHelpClosed('escape_key');
       helpModal.classList.remove('active');
     }
   });
