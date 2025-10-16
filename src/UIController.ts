@@ -383,6 +383,11 @@ export class UIController {
     this.startButton.disabled = !hasGrid || isRunning;
     this.stopButton.disabled = !hasGrid || !isRunning;
     this.restartButton.disabled = !hasGrid;
+
+    // Disable critical settings that affect simulation behavior while running
+    this.cellsDieInput.disabled = isRunning;
+    this.allowRandomMoveInput.disabled = isRunning;
+    this.cannibalModeInput.disabled = isRunning;
   }
 
   private handleNoMovesAvailable(): void {
