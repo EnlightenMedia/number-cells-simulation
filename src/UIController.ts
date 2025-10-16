@@ -314,6 +314,13 @@ export class UIController {
         if (entity instanceof Cell) {
           cellDiv.classList.add('cell');
           cellDiv.textContent = entity.value.toString();
+
+          // Set opacity based on energy (0 energy = 10% opacity, max energy = 100% opacity)
+          const maxEnergy = parseInt(this.energyInput.value) || 3;
+          const energyRatio = entity.energy / maxEnergy;
+          // Map energy ratio from 0-1 to opacity 0.1-1.0
+          const opacity = 0.1 + energyRatio * 0.9;
+          cellDiv.style.opacity = opacity.toString();
         } else if (entity instanceof Food) {
           // Don't render food in cannibal mode (there shouldn't be any, but just in case)
           if (!this.cannibalModeInput.checked) {
