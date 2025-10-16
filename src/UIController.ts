@@ -95,7 +95,11 @@ export class UIController {
       if (this.engine) {
         this.engine.stop();
       }
-      this.engine = new SimulationEngine(this.grid, () => this.render());
+      this.engine = new SimulationEngine(
+        this.grid,
+        () => this.render(),
+        () => this.handleNoMovesAvailable(),
+      );
 
       this.render();
       this.updateControlStates();
@@ -209,6 +213,11 @@ export class UIController {
     this.startButton.disabled = !hasGrid || isRunning;
     this.stopButton.disabled = !hasGrid || !isRunning;
     this.restartButton.disabled = !hasGrid;
+  }
+
+  private handleNoMovesAvailable(): void {
+    this.updateControlStates();
+    this.showStatus('Simulation stopped - No more moves available', 'info');
   }
 
   private showStatus(message: string, type: 'success' | 'error' | 'info'): void {

@@ -8,7 +8,7 @@ export class SimulationEngine {
   private intervalId: number | null = null;
   private tickCount: number = 0;
 
-  constructor(grid: Grid, private onUpdate: () => void) {
+  constructor(grid: Grid, private onUpdate: () => void, private onNoMovesAvailable?: () => void) {
     this.grid = grid;
   }
 
@@ -104,6 +104,9 @@ export class SimulationEngine {
       const anyMoved = this.tick();
       if (!anyMoved) {
         this.stop();
+        if (this.onNoMovesAvailable) {
+          this.onNoMovesAvailable();
+        }
       }
     }, delayMs);
   }
