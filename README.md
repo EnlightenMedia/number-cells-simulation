@@ -110,3 +110,7 @@ src/
 ├── main.ts            # Application entry point
 └── index.html         # HTML template with embedded CSS
 ```
+
+## Acknowledgements
+
+This simulation was inspired by [Conway's Game of Life](https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life), a cellular automaton devised by mathematician John Horton Conway in 1970. While Conway's Game of Life uses simple binary rules for cell survival and death, Number Cell Simulation extends these concepts with numeric values, energy systems, and consumption mechanics to create a more complex emergent behavior system.

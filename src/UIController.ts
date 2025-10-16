@@ -239,12 +239,28 @@ export class UIController {
     const maxValue = parseInt(this.maxValueInput.value);
     const energy = parseInt(this.energyInput.value);
 
+    // Validate
+    if (foodCount + cellCount > this.grid.width * this.grid.height) {
+      this.showStatus('Too many entities for current grid size', 'error');
+      return;
+    }
+
+    // Reinitialize the existing grid with new entities
     this.grid.initialize(foodCount, cellCount, maxValue, energy);
-    this.engine.reset();
-    this.engine.setGrid(this.grid);
+
+    // Create new engine with updated settings
+    this.engine = new SimulationEngine(
+      this.grid,
+      () => this.render(),
+      () => this.handleNoMovesAvailable(),
+      this.cellsDieInput.checked,
+      energy,
+      this.allowRandomMoveInput.checked,
+    );
+
     this.render();
     this.updateControlStates();
-    this.showStatus('Grid restarted', 'success');
+    this.showStatus('Simulation restarted with current settings', 'success');
   }
 
   private render(): void {
