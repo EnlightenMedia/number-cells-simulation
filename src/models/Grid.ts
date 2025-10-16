@@ -15,7 +15,7 @@ export class Grid {
   /**
    * Initializes the grid with random food and cells
    */
-  initialize(foodCount: number, cellCount: number, maxValue: number = 9): void {
+  initialize(foodCount: number, cellCount: number, maxValue: number = 9, energy: number = 3): void {
     if (foodCount + cellCount > this.width * this.height) {
       throw new Error('Too many entities for grid size');
     }
@@ -46,7 +46,7 @@ export class Grid {
     for (let i = 0; i < cellCount; i++) {
       const pos = availablePositions[foodCount + i];
       const value = Math.floor(Math.random() * (maxValue + 1));
-      this.grid[pos.y][pos.x] = new Cell(pos, value, maxValue);
+      this.grid[pos.y][pos.x] = new Cell(pos, value, maxValue, energy);
     }
   }
 
@@ -113,7 +113,9 @@ export class Grid {
       for (let x = 0; x < this.width; x++) {
         const entity = this.grid[y][x];
         if (entity instanceof Cell) {
-          newGrid.grid[y][x] = new Cell({ x, y }, entity.value, entity.maxValue);
+          const clonedCell = new Cell({ x, y }, entity.value, entity.maxValue, entity.energy);
+          clonedCell.energy = entity.energy;
+          newGrid.grid[y][x] = clonedCell;
         } else if (entity instanceof Food) {
           newGrid.grid[y][x] = new Food({ x, y }, entity.value, entity.maxValue);
         }

@@ -13,6 +13,7 @@ export class UIController {
   private foodInput: HTMLInputElement;
   private cellsInput: HTMLInputElement;
   private maxValueInput: HTMLInputElement;
+  private energyInput: HTMLInputElement;
   private cellsDieInput: HTMLInputElement;
   private delayInput: HTMLInputElement;
 
@@ -35,6 +36,7 @@ export class UIController {
     this.foodInput = document.getElementById('food') as HTMLInputElement;
     this.cellsInput = document.getElementById('cells') as HTMLInputElement;
     this.maxValueInput = document.getElementById('maxValue') as HTMLInputElement;
+    this.energyInput = document.getElementById('energy') as HTMLInputElement;
     this.cellsDieInput = document.getElementById('cellsDie') as HTMLInputElement;
     this.delayInput = document.getElementById('delay') as HTMLInputElement;
 
@@ -50,8 +52,30 @@ export class UIController {
     this.tickCounter = document.getElementById('tick-counter') as HTMLElement;
     this.statusMessage = document.getElementById('status-message') as HTMLElement;
 
+    this.loadSavedValues();
     this.setupEventListeners();
+    this.setupInputSaveListeners();
     this.updateControlStates();
+  }
+
+  private loadSavedValues(): void {
+    const savedHeight = localStorage.getItem('number-cell-height');
+    const savedWidth = localStorage.getItem('number-cell-width');
+    const savedFood = localStorage.getItem('number-cell-food');
+    const savedCells = localStorage.getItem('number-cell-cells');
+    const savedMaxValue = localStorage.getItem('number-cell-maxValue');
+    const savedEnergy = localStorage.getItem('number-cell-energy');
+    const savedCellsDie = localStorage.getItem('number-cell-cellsDie');
+    const savedDelay = localStorage.getItem('number-cell-delay');
+
+    if (savedHeight) this.heightInput.value = savedHeight;
+    if (savedWidth) this.widthInput.value = savedWidth;
+    if (savedFood) this.foodInput.value = savedFood;
+    if (savedCells) this.cellsInput.value = savedCells;
+    if (savedMaxValue) this.maxValueInput.value = savedMaxValue;
+    if (savedEnergy) this.energyInput.value = savedEnergy;
+    if (savedCellsDie !== null) this.cellsDieInput.checked = savedCellsDie === 'true';
+    if (savedDelay) this.delayInput.value = savedDelay;
   }
 
   private setupEventListeners(): void {
@@ -62,12 +86,40 @@ export class UIController {
     this.restartButton.addEventListener('click', () => this.restartSimulation());
   }
 
+  private setupInputSaveListeners(): void {
+    this.heightInput.addEventListener('change', () => {
+      localStorage.setItem('number-cell-height', this.heightInput.value);
+    });
+    this.widthInput.addEventListener('change', () => {
+      localStorage.setItem('number-cell-width', this.widthInput.value);
+    });
+    this.foodInput.addEventListener('change', () => {
+      localStorage.setItem('number-cell-food', this.foodInput.value);
+    });
+    this.cellsInput.addEventListener('change', () => {
+      localStorage.setItem('number-cell-cells', this.cellsInput.value);
+    });
+    this.maxValueInput.addEventListener('change', () => {
+      localStorage.setItem('number-cell-maxValue', this.maxValueInput.value);
+    });
+    this.energyInput.addEventListener('change', () => {
+      localStorage.setItem('number-cell-energy', this.energyInput.value);
+    });
+    this.cellsDieInput.addEventListener('change', () => {
+      localStorage.setItem('number-cell-cellsDie', this.cellsDieInput.checked.toString());
+    });
+    this.delayInput.addEventListener('change', () => {
+      localStorage.setItem('number-cell-delay', this.delayInput.value);
+    });
+  }
+
   private initializeGrid(): void {
     const height = parseInt(this.heightInput.value);
     const width = parseInt(this.widthInput.value);
     const foodCount = parseInt(this.foodInput.value);
     const cellCount = parseInt(this.cellsInput.value);
     const maxValue = parseInt(this.maxValueInput.value);
+    const energy = parseInt(this.energyInput.value);
 
     // Validation
     if (isNaN(height) || height < 1 || height > 50) {
@@ -90,6 +142,10 @@ export class UIController {
       this.showStatus('Max value must be between 1 and 99', 'error');
       return;
     }
+    if (isNaN(energy) || energy < 1 || energy > 100) {
+      this.showStatus('Energy must be between 1 and 100', 'error');
+      return;
+    }
     if (foodCount + cellCount > height * width) {
       this.showStatus('Too many entities for grid size', 'error');
       return;
@@ -98,7 +154,7 @@ export class UIController {
     try {
       // Create new grid
       this.grid = new Grid(width, height);
-      this.grid.initialize(foodCount, cellCount, maxValue);
+      this.grid.initialize(foodCount, cellCount, maxValue, energy);
 
       // Create new engine
       if (this.engine) {
@@ -109,6 +165,7 @@ export class UIController {
         () => this.render(),
         () => this.handleNoMovesAvailable(),
         this.cellsDieInput.checked,
+        energy,
       );
 
       this.render();
@@ -168,8 +225,9 @@ export class UIController {
     const foodCount = parseInt(this.foodInput.value);
     const cellCount = parseInt(this.cellsInput.value);
     const maxValue = parseInt(this.maxValueInput.value);
+    const energy = parseInt(this.energyInput.value);
 
-    this.grid.initialize(foodCount, cellCount, maxValue);
+    this.grid.initialize(foodCount, cellCount, maxValue, energy);
     this.engine.reset();
     this.engine.setGrid(this.grid);
     this.render();

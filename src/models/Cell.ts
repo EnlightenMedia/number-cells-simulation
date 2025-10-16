@@ -1,10 +1,18 @@
 import { Position } from './Food';
 
 export class Cell {
-  constructor(public position: Position, public value: number, public maxValue: number = 9) {
+  public energy: number;
+
+  constructor(
+    public position: Position,
+    public value: number,
+    public maxValue: number = 9,
+    initialEnergy: number = 3,
+  ) {
     if (value < 0 || value > maxValue) {
       throw new Error(`Cell value must be between 0 and ${maxValue}`);
     }
+    this.energy = initialEnergy;
   }
 
   /**
@@ -25,5 +33,26 @@ export class Cell {
    */
   getLeftBehindFoodValue(): number {
     return (this.value + 1) % (this.maxValue + 1);
+  }
+
+  /**
+   * Decreases cell energy by 1
+   */
+  decreaseEnergy(): void {
+    this.energy = Math.max(0, this.energy - 1);
+  }
+
+  /**
+   * Restores cell energy to initial value when eating
+   */
+  restoreEnergy(initialEnergy: number): void {
+    this.energy = initialEnergy;
+  }
+
+  /**
+   * Checks if cell is still alive
+   */
+  isAlive(): boolean {
+    return this.energy > 0;
   }
 }

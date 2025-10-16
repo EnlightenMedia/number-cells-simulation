@@ -8,15 +8,18 @@ export class SimulationEngine {
   private intervalId: number | null = null;
   private tickCount: number = 0;
   private cellsDie: boolean;
+  private initialEnergy: number;
 
   constructor(
     grid: Grid,
     private onUpdate: () => void,
     private onNoMovesAvailable?: () => void,
     cellsDie: boolean = false,
+    initialEnergy: number = 3,
   ) {
     this.grid = grid;
     this.cellsDie = cellsDie;
+    this.initialEnergy = initialEnergy;
   }
 
   setGrid(grid: Grid): void {
@@ -56,11 +59,18 @@ export class SimulationEngine {
       if (moved) {
         anyMoved = true;
       } else if (this.cellsDie) {
-        // Remove cell that didn't eat (if it's still at its original position)
+        // Decrease energy if cell didn't eat
         const currentEntity = this.grid.getEntity(position.x, position.y);
         if (currentEntity === cell) {
-          console.log(`    Cell starved and died at (${position.x},${position.y})`);
-          this.grid.setEntity(position.x, position.y, null);
+          cell.decreaseEnergy();
+          console.log(
+            `    Cell energy decreased to ${cell.energy} at (${position.x},${position.y})`,
+          );
+          // Remove cell if energy reaches zero
+          if (!cell.isAlive()) {
+            console.log(`    Cell died at (${position.x},${position.y})`);
+            this.grid.setEntity(position.x, position.y, null);
+          }
         }
       }
     }
@@ -109,6 +119,9 @@ export class SimulationEngine {
         newPosition.y
       }), eating food ${targetFood.value}, leaving food ${cell.getLeftBehindFoodValue()}`,
     );
+
+    // Restore cell energy after eating
+    cell.restoreEnergy(this.initialEnergy);
 
     // Create new food to leave behind
     const leftBehindFood = new Food(oldPosition, cell.getLeftBehindFoodValue(), cell.maxValue);
