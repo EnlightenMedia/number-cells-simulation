@@ -15,6 +15,7 @@ export class UIController {
   private maxValueInput: HTMLInputElement;
   private energyInput: HTMLInputElement;
   private cellsDieInput: HTMLInputElement;
+  private allowRandomMoveInput: HTMLInputElement;
   private delayInput: HTMLInputElement;
 
   // Button elements
@@ -38,6 +39,7 @@ export class UIController {
     this.maxValueInput = document.getElementById('maxValue') as HTMLInputElement;
     this.energyInput = document.getElementById('energy') as HTMLInputElement;
     this.cellsDieInput = document.getElementById('cellsDie') as HTMLInputElement;
+    this.allowRandomMoveInput = document.getElementById('allowRandomMove') as HTMLInputElement;
     this.delayInput = document.getElementById('delay') as HTMLInputElement;
 
     // Get button elements
@@ -66,6 +68,7 @@ export class UIController {
     const savedMaxValue = localStorage.getItem('number-cell-maxValue');
     const savedEnergy = localStorage.getItem('number-cell-energy');
     const savedCellsDie = localStorage.getItem('number-cell-cellsDie');
+    const savedAllowRandomMove = localStorage.getItem('number-cell-allowRandomMove');
     const savedDelay = localStorage.getItem('number-cell-delay');
 
     if (savedHeight) this.heightInput.value = savedHeight;
@@ -75,6 +78,8 @@ export class UIController {
     if (savedMaxValue) this.maxValueInput.value = savedMaxValue;
     if (savedEnergy) this.energyInput.value = savedEnergy;
     if (savedCellsDie !== null) this.cellsDieInput.checked = savedCellsDie === 'true';
+    if (savedAllowRandomMove !== null)
+      this.allowRandomMoveInput.checked = savedAllowRandomMove === 'true';
     if (savedDelay) this.delayInput.value = savedDelay;
   }
 
@@ -107,6 +112,12 @@ export class UIController {
     });
     this.cellsDieInput.addEventListener('change', () => {
       localStorage.setItem('number-cell-cellsDie', this.cellsDieInput.checked.toString());
+    });
+    this.allowRandomMoveInput.addEventListener('change', () => {
+      localStorage.setItem(
+        'number-cell-allowRandomMove',
+        this.allowRandomMoveInput.checked.toString(),
+      );
     });
     this.delayInput.addEventListener('change', () => {
       localStorage.setItem('number-cell-delay', this.delayInput.value);
@@ -166,6 +177,7 @@ export class UIController {
         () => this.handleNoMovesAvailable(),
         this.cellsDieInput.checked,
         energy,
+        this.allowRandomMoveInput.checked,
       );
 
       this.render();

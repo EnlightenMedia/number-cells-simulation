@@ -9,6 +9,7 @@ export class SimulationEngine {
   private tickCount: number = 0;
   private cellsDie: boolean;
   private initialEnergy: number;
+  private allowRandomMove: boolean;
 
   constructor(
     grid: Grid,
@@ -16,10 +17,12 @@ export class SimulationEngine {
     private onNoMovesAvailable?: () => void,
     cellsDie: boolean = false,
     initialEnergy: number = 3,
+    allowRandomMove: boolean = false,
   ) {
     this.grid = grid;
     this.cellsDie = cellsDie;
     this.initialEnergy = initialEnergy;
+    this.allowRandomMove = allowRandomMove;
   }
 
   setGrid(grid: Grid): void {
@@ -54,22 +57,32 @@ export class SimulationEngine {
     for (let i = 0; i < cellPositions.length; i++) {
       const { cell, position } = cellPositions[i];
       console.log(`  Processing cell ${i}: value=${cell.value} at (${position.x},${position.y})`);
-      const moved = this.processCellMovement(cell, position);
-      console.log(`    Result: ${moved ? 'MOVED' : 'no move'}`);
-      if (moved) {
+      const movedAndAte = this.processCellMovement(cell, position);
+      console.log(`    Result: ${movedAndAte ? 'MOVED AND ATE' : 'no move'}`);
+
+      if (movedAndAte) {
         anyMoved = true;
-      } else if (this.cellsDie) {
-        // Decrease energy if cell didn't eat
-        const currentEntity = this.grid.getEntity(position.x, position.y);
-        if (currentEntity === cell) {
+      } else {
+        // Try random movement if allowed and cell can't eat
+        let movedRandomly = false;
+        if (this.allowRandomMove && cell.isAlive()) {
+          movedRandomly = this.processRandomMovement(cell, position);
+          if (movedRandomly) {
+            console.log(`    Cell moved randomly`);
+            anyMoved = true;
+          }
+        }
+
+        // Decrease energy if cell didn't eat (regardless of whether it moved randomly)
+        if (this.cellsDie && !movedAndAte) {
           cell.decreaseEnergy();
           console.log(
-            `    Cell energy decreased to ${cell.energy} at (${position.x},${position.y})`,
+            `    Cell energy decreased to ${cell.energy} at (${cell.position.x},${cell.position.y})`,
           );
           // Remove cell if energy reaches zero
           if (!cell.isAlive()) {
-            console.log(`    Cell died at (${position.x},${position.y})`);
-            this.grid.setEntity(position.x, position.y, null);
+            console.log(`    Cell died at (${cell.position.x},${cell.position.y})`);
+            this.grid.setEntity(cell.position.x, cell.position.y, null);
           }
         }
       }
@@ -131,6 +144,58 @@ export class SimulationEngine {
 
     // Place new food where cell was
     this.grid.setEntity(oldPosition.x, oldPosition.y, leftBehindFood);
+
+    return true;
+  }
+
+  /**
+   * Processes random movement for a cell that can't eat
+   * Returns true if the cell moved, false otherwise
+   */
+  private processRandomMovement(cell: Cell, originalPosition: { x: number; y: number }): boolean {
+    // Verify the cell is still at the position we expect
+    const currentEntity = this.grid.getEntity(originalPosition.x, originalPosition.y);
+    if (currentEntity !== cell) {
+      return false;
+    }
+
+    const adjacentPositions = this.grid.getAdjacentPositions(originalPosition);
+    const validPositions: { x: number; y: number; hasFood: boolean; food?: Food }[] = [];
+
+    // Find all adjacent empty positions or positions with food (but not consumable food)
+    for (const pos of adjacentPositions) {
+      const entity = this.grid.getEntity(pos.x, pos.y);
+      if (entity === null) {
+        validPositions.push({ x: pos.x, y: pos.y, hasFood: false });
+      } else if (entity instanceof Food && !cell.canConsume(entity.value)) {
+        // Only allow swapping with food that can't be eaten
+        validPositions.push({ x: pos.x, y: pos.y, hasFood: true, food: entity });
+      }
+    }
+
+    if (validPositions.length === 0) {
+      return false;
+    }
+
+    // Randomly select one valid position
+    const target = validPositions[Math.floor(Math.random() * validPositions.length)];
+
+    console.log(
+      `      Moving randomly from (${originalPosition.x},${originalPosition.y}) to (${target.x},${
+        target.y
+      })${target.hasFood ? ' (swapping with food)' : ''}`,
+    );
+
+    // Move cell to target position
+    this.grid.setEntity(target.x, target.y, cell);
+
+    // If there was food at target, move it to original position
+    if (target.hasFood && target.food) {
+      this.grid.setEntity(originalPosition.x, originalPosition.y, target.food);
+    } else {
+      // Set original position to empty
+      this.grid.setEntity(originalPosition.x, originalPosition.y, null);
+    }
 
     return true;
   }
