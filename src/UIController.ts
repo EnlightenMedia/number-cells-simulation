@@ -160,12 +160,12 @@ export class UIController {
     const energy = parseInt(this.energyInput.value);
 
     // Validation
-    if (isNaN(height) || height < 1 || height > 50) {
-      this.showStatus('Height must be between 1 and 50', 'error');
+    if (isNaN(height) || height < 1 || height > 100) {
+      this.showStatus('Height must be between 1 and 100', 'error');
       return;
     }
-    if (isNaN(width) || width < 1 || width > 50) {
-      this.showStatus('Width must be between 1 and 50', 'error');
+    if (isNaN(width) || width < 1 || width > 100) {
+      this.showStatus('Width must be between 1 and 100', 'error');
       return;
     }
     if (isNaN(foodCount) || foodCount < 0) {
