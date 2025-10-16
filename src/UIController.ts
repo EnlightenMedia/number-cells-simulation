@@ -16,6 +16,7 @@ export class UIController {
   private energyInput: HTMLInputElement;
   private cellsDieInput: HTMLInputElement;
   private allowRandomMoveInput: HTMLInputElement;
+  private cannibalModeInput: HTMLInputElement;
   private delayInput: HTMLInputElement;
 
   // Button elements
@@ -40,6 +41,7 @@ export class UIController {
     this.energyInput = document.getElementById('energy') as HTMLInputElement;
     this.cellsDieInput = document.getElementById('cellsDie') as HTMLInputElement;
     this.allowRandomMoveInput = document.getElementById('allowRandomMove') as HTMLInputElement;
+    this.cannibalModeInput = document.getElementById('cannibalMode') as HTMLInputElement;
     this.delayInput = document.getElementById('delay') as HTMLInputElement;
 
     // Get button elements
@@ -57,6 +59,11 @@ export class UIController {
     this.loadSavedValues();
     this.setupEventListeners();
     this.setupInputSaveListeners();
+    // Set initial food input state based on cannibal mode
+    this.foodInput.disabled = this.cannibalModeInput.checked;
+    if (this.cannibalModeInput.checked) {
+      this.foodInput.value = '0';
+    }
     this.updateControlStates();
   }
 
@@ -69,6 +76,7 @@ export class UIController {
     const savedEnergy = localStorage.getItem('number-cell-energy');
     const savedCellsDie = localStorage.getItem('number-cell-cellsDie');
     const savedAllowRandomMove = localStorage.getItem('number-cell-allowRandomMove');
+    const savedCannibalMode = localStorage.getItem('number-cell-cannibalMode');
     const savedDelay = localStorage.getItem('number-cell-delay');
 
     if (savedHeight) this.heightInput.value = savedHeight;
@@ -80,7 +88,14 @@ export class UIController {
     if (savedCellsDie !== null) this.cellsDieInput.checked = savedCellsDie === 'true';
     if (savedAllowRandomMove !== null)
       this.allowRandomMoveInput.checked = savedAllowRandomMove === 'true';
+    if (savedCannibalMode !== null) this.cannibalModeInput.checked = savedCannibalMode === 'true';
     if (savedDelay) this.delayInput.value = savedDelay;
+
+    // Set initial food input state based on cannibal mode
+    this.foodInput.disabled = this.cannibalModeInput.checked;
+    if (this.cannibalModeInput.checked) {
+      this.foodInput.value = '0';
+    }
   }
 
   private setupEventListeners(): void {
@@ -119,6 +134,14 @@ export class UIController {
         this.allowRandomMoveInput.checked.toString(),
       );
     });
+    this.cannibalModeInput.addEventListener('change', () => {
+      localStorage.setItem('number-cell-cannibalMode', this.cannibalModeInput.checked.toString());
+      // Disable food input in cannibal mode
+      this.foodInput.disabled = this.cannibalModeInput.checked;
+      if (this.cannibalModeInput.checked) {
+        this.foodInput.value = '0';
+      }
+    });
     this.delayInput.addEventListener('change', () => {
       localStorage.setItem('number-cell-delay', this.delayInput.value);
     });
@@ -127,7 +150,7 @@ export class UIController {
   private initializeGrid(): void {
     const height = parseInt(this.heightInput.value);
     const width = parseInt(this.widthInput.value);
-    const foodCount = parseInt(this.foodInput.value);
+    const foodCount = this.cannibalModeInput.checked ? 0 : parseInt(this.foodInput.value);
     const cellCount = parseInt(this.cellsInput.value);
     const maxValue = parseInt(this.maxValueInput.value);
     const energy = parseInt(this.energyInput.value);
@@ -178,6 +201,7 @@ export class UIController {
         this.cellsDieInput.checked,
         energy,
         this.allowRandomMoveInput.checked,
+        this.cannibalModeInput.checked,
       );
 
       this.render();
@@ -234,7 +258,7 @@ export class UIController {
     }
 
     this.engine.stop();
-    const foodCount = parseInt(this.foodInput.value);
+    const foodCount = this.cannibalModeInput.checked ? 0 : parseInt(this.foodInput.value);
     const cellCount = parseInt(this.cellsInput.value);
     const maxValue = parseInt(this.maxValueInput.value);
     const energy = parseInt(this.energyInput.value);
@@ -256,6 +280,7 @@ export class UIController {
       this.cellsDieInput.checked,
       energy,
       this.allowRandomMoveInput.checked,
+      this.cannibalModeInput.checked,
     );
 
     this.render();
@@ -286,8 +311,13 @@ export class UIController {
           cellDiv.classList.add('cell');
           cellDiv.textContent = entity.value.toString();
         } else if (entity instanceof Food) {
-          cellDiv.classList.add('food');
-          cellDiv.textContent = entity.value.toString();
+          // Don't render food in cannibal mode (there shouldn't be any, but just in case)
+          if (!this.cannibalModeInput.checked) {
+            cellDiv.classList.add('food');
+            cellDiv.textContent = entity.value.toString();
+          } else {
+            cellDiv.classList.add('empty');
+          }
         } else {
           cellDiv.classList.add('empty');
         }

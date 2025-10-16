@@ -10,6 +10,7 @@ export class SimulationEngine {
   private cellsDie: boolean;
   private initialEnergy: number;
   private allowRandomMove: boolean;
+  private cannibalMode: boolean;
 
   constructor(
     grid: Grid,
@@ -18,11 +19,13 @@ export class SimulationEngine {
     cellsDie: boolean = false,
     initialEnergy: number = 3,
     allowRandomMove: boolean = false,
+    cannibalMode: boolean = false,
   ) {
     this.grid = grid;
     this.cellsDie = cellsDie;
     this.initialEnergy = initialEnergy;
     this.allowRandomMove = allowRandomMove;
+    this.cannibalMode = cannibalMode;
   }
 
   setGrid(grid: Grid): void {
@@ -106,14 +109,22 @@ export class SimulationEngine {
     }
 
     const adjacentPositions = this.grid.getAdjacentPositions(originalPosition);
-    const validMoves: Food[] = [];
+    const validMoves: Array<{ entity: Food | Cell; position: { x: number; y: number } }> = [];
 
-    // Find all adjacent food that this cell can consume
+    // Find all adjacent food/cells that this cell can consume
     for (const pos of adjacentPositions) {
       const entity = this.grid.getEntity(pos.x, pos.y);
       if (entity instanceof Food && cell.canConsume(entity.value)) {
         console.log(`      Found consumable food: value=${entity.value} at (${pos.x},${pos.y})`);
-        validMoves.push(entity);
+        validMoves.push({ entity, position: pos });
+      } else if (
+        this.cannibalMode &&
+        entity instanceof Cell &&
+        entity !== cell &&
+        cell.canConsume(entity.value)
+      ) {
+        console.log(`      Found consumable cell: value=${entity.value} at (${pos.x},${pos.y})`);
+        validMoves.push({ entity, position: pos });
       }
     }
 
@@ -123,27 +134,38 @@ export class SimulationEngine {
     }
 
     // Randomly select one valid move
-    const targetFood = validMoves[Math.floor(Math.random() * validMoves.length)];
+    const target = validMoves[Math.floor(Math.random() * validMoves.length)];
     const oldPosition = { ...originalPosition };
-    const newPosition = { ...targetFood.position };
+    const newPosition = { ...target.position };
+    const leftBehindValue = cell.getLeftBehindFoodValue();
 
     console.log(
       `      Moving from (${oldPosition.x},${oldPosition.y}) to (${newPosition.x},${
         newPosition.y
-      }), eating food ${targetFood.value}, leaving food ${cell.getLeftBehindFoodValue()}`,
+      }), eating ${target.entity instanceof Cell ? 'cell' : 'food'} ${
+        target.entity.value
+      }, leaving ${this.cannibalMode ? 'cell' : 'food'} ${leftBehindValue}`,
     );
 
     // Restore cell energy after eating
     cell.restoreEnergy(this.initialEnergy);
 
-    // Create new food to leave behind
-    const leftBehindFood = new Food(oldPosition, cell.getLeftBehindFoodValue(), cell.maxValue);
-
-    // Move cell to food position
+    // Move cell to target position
     this.grid.setEntity(newPosition.x, newPosition.y, cell);
 
-    // Place new food where cell was
-    this.grid.setEntity(oldPosition.x, oldPosition.y, leftBehindFood);
+    // Create new entity to leave behind (cell in cannibal mode, food otherwise)
+    if (this.cannibalMode) {
+      const leftBehindCell = new Cell(
+        oldPosition,
+        leftBehindValue,
+        cell.maxValue,
+        this.initialEnergy,
+      );
+      this.grid.setEntity(oldPosition.x, oldPosition.y, leftBehindCell);
+    } else {
+      const leftBehindFood = new Food(oldPosition, leftBehindValue, cell.maxValue);
+      this.grid.setEntity(oldPosition.x, oldPosition.y, leftBehindFood);
+    }
 
     return true;
   }
@@ -162,7 +184,7 @@ export class SimulationEngine {
     const adjacentPositions = this.grid.getAdjacentPositions(originalPosition);
     const validPositions: { x: number; y: number; hasFood: boolean; food?: Food }[] = [];
 
-    // Find all adjacent empty positions or positions with food (but not consumable food)
+    // Find all adjacent empty positions or positions with food (but not consumable food/cells)
     for (const pos of adjacentPositions) {
       const entity = this.grid.getEntity(pos.x, pos.y);
       if (entity === null) {
@@ -171,6 +193,7 @@ export class SimulationEngine {
         // Only allow swapping with food that can't be eaten
         validPositions.push({ x: pos.x, y: pos.y, hasFood: true, food: entity });
       }
+      // In cannibal mode, don't allow random swapping with cells
     }
 
     if (validPositions.length === 0) {
