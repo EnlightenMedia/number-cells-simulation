@@ -8,6 +8,7 @@ A modular TypeScript application that simulates cells consuming food on a grid w
 - **Customizable Max Value**: Configure the maximum value for both food and cells (1-99)
 - **Energy System**: Cells have energy that depletes each tick and restores when eating
 - **Survival Mode**: Toggle whether cells die when starved
+- **Random Movement**: Optionally allow cells to move randomly when they can't eat
 - **Interactive Controls**: Step through simulation manually or run continuously
 - **Visual Display**: Clear grid visualization with color-coded entities (green for food, red for cells)
 - **Persistent Settings**: All configuration values are automatically saved to browser storage
@@ -43,6 +44,15 @@ A modular TypeScript application that simulates cells consuming food on a grid w
   - Simulation automatically stops when all cells have died
 - When disabled, cells persist indefinitely even if they can't move, and the simulation runs continuously
 
+### Random Movement
+
+- When "Allow Random Movement" is enabled:
+  - Cells that cannot find consumable food can still move to random adjacent positions
+  - They can move to empty spaces or swap positions with non-consumable food
+  - Random movement always has lower priority than eating
+  - Energy still depletes on random movement (when starvation mode is enabled)
+  - This creates more dynamic simulations where cells explore the grid
+
 ## Setup
 
 1. Install dependencies:
@@ -67,13 +77,14 @@ A modular TypeScript application that simulates cells consuming food on a grid w
 
 ### Configuration Options
 
-- **Height** (1-50): Number of rows in the grid
-- **Width** (1-50): Number of columns in the grid
+- **Height** (1-100): Number of rows in the grid
+- **Width** (1-100): Number of columns in the grid
 - **Food Count** (0+): Number of food items to place on the grid
 - **Cell Count** (0+): Number of cells to place on the grid
 - **Max Value** (1-99): Maximum value for both food and cells
 - **Cell Energy** (1-100): Initial energy level for cells
 - **Cells Die if Starved**: Toggle whether cells lose energy and die when not eating
+- **Allow Random Movement**: When enabled, cells can move to random adjacent spaces (empty or with non-consumable food) when they can't eat, swapping positions with food if present
 - **Delay** (10+ ms): Time between simulation ticks when running continuously
 
 ### Steps to Run

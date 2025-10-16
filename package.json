@@ -18,5 +18,8 @@
   "devDependencies": {
     "typescript": "^5.2.2",
     "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "marked": "^16.4.0"
   }
 }
