@@ -29,6 +29,8 @@ export class UIController {
   // Display elements
   private gridContainer: HTMLElement;
   private tickCounter: HTMLElement;
+  private foodCounter: HTMLElement;
+  private cellCounter: HTMLElement;
   private statusMessage: HTMLElement;
 
   constructor() {
@@ -54,6 +56,8 @@ export class UIController {
     // Get display elements
     this.gridContainer = document.getElementById('grid-container') as HTMLElement;
     this.tickCounter = document.getElementById('tick-counter') as HTMLElement;
+    this.foodCounter = document.getElementById('food-counter') as HTMLElement;
+    this.cellCounter = document.getElementById('cell-counter') as HTMLElement;
     this.statusMessage = document.getElementById('status-message') as HTMLElement;
 
     this.loadSavedValues();
@@ -326,9 +330,16 @@ export class UIController {
       }
     }
 
-    // Update tick counter
+    // Update tick counter and entity counts
     if (this.engine) {
       this.tickCounter.textContent = `Tick: ${this.engine.getTickCount()}`;
+      
+      // Count food and cells
+      const foodCount = this.grid.getAllFood().length;
+      const cellCount = this.grid.getAllCells().length;
+      
+      this.foodCounter.textContent = `Food: ${foodCount}`;
+      this.cellCounter.textContent = `Cells: ${cellCount}`;
     }
   }
 

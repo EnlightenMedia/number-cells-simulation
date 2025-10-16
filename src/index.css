@@ -392,9 +392,17 @@ button:disabled {
   border: 2px solid #e9ecef;
 }
 
-#tick-counter {
-  font-size: 1.2em;
-  font-weight: 700;
+.info-stats {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+#tick-counter,
+#food-counter,
+#cell-counter {
+  font-size: 1.1em;
+  font-weight: bold;
   color: #667eea;
 }
 

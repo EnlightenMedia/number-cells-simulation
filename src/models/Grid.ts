@@ -113,6 +113,22 @@ export class Grid {
   }
 
   /**
+   * Gets all food in the grid
+   */
+  getAllFood(): Food[] {
+    const food: Food[] = [];
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const entity = this.grid[y][x];
+        if (entity instanceof Food) {
+          food.push(entity);
+        }
+      }
+    }
+    return food;
+  }
+
+  /**
    * Creates a copy of the current grid state
    */
   clone(): Grid {
