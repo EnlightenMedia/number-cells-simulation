@@ -108,7 +108,7 @@ export class SimulationEngine {
       console.log(`      Cell is no longer at original position - skipping`);
       return false;
     }
-    
+
     // In cannibal mode, also verify this cell still exists somewhere on the grid
     // (it might have been consumed by another cell)
     if (this.cannibalMode) {
