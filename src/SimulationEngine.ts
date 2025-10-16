@@ -101,11 +101,22 @@ export class SimulationEngine {
    * Returns true if the cell moved, false otherwise
    */
   private processCellMovement(cell: Cell, originalPosition: { x: number; y: number }): boolean {
-    // Verify the cell is still at the position we expect (it might have been moved by another cell)
+    // Verify the cell is still at the position we expect (it might have been moved or consumed)
     const currentEntity = this.grid.getEntity(originalPosition.x, originalPosition.y);
     if (currentEntity !== cell) {
       // This cell has already been moved or consumed
+      console.log(`      Cell is no longer at original position - skipping`);
       return false;
+    }
+    
+    // In cannibal mode, also verify this cell still exists somewhere on the grid
+    // (it might have been consumed by another cell)
+    if (this.cannibalMode) {
+      const allCurrentCells = this.grid.getAllCells();
+      if (!allCurrentCells.includes(cell)) {
+        console.log(`      Cell has been consumed - skipping`);
+        return false;
+      }
     }
 
     const adjacentPositions = this.grid.getAdjacentPositions(originalPosition);

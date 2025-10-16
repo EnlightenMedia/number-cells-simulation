@@ -11,6 +11,7 @@ A modular TypeScript application that simulates cells consuming food on a grid w
 - **Energy System**: Cells have energy that depletes each tick and restores when eating
 - **Survival Mode**: Toggle whether cells die when starved
 - **Random Movement**: Optionally allow cells to move randomly when they can't eat
+- **Cannibal Mode**: Cells can consume other cells instead of food, creating pure predator dynamics
 - **Interactive Controls**: Step through simulation manually or run continuously
 - **Visual Display**: Clear grid visualization with color-coded entities (green for food, red for cells)
 - **Persistent Settings**: All configuration values are automatically saved to browser storage
@@ -55,6 +56,17 @@ A modular TypeScript application that simulates cells consuming food on a grid w
   - Energy still depletes on random movement (when starvation mode is enabled)
   - This creates more dynamic simulations where cells explore the grid
 
+### Cannibal Mode
+
+- When "Cannibal Mode" is enabled:
+  - Food count is automatically set to 0 and the input is disabled
+  - Cells can consume other cells using the same consumption rules
+  - When a cell eats another cell, it moves to that position
+  - A new cell is created at the predator's previous position (instead of food)
+  - The population can grow or shrink based on consumption patterns
+  - Creates pure predator-prey dynamics where cells hunt each other
+  - Combine with energy system and random movement for complex emergent behavior
+
 ## Setup
 
 1. Install dependencies:
@@ -87,6 +99,7 @@ A modular TypeScript application that simulates cells consuming food on a grid w
 - **Cell Energy** (1-100): Initial energy level for cells
 - **Cells Die if Starved**: Toggle whether cells lose energy and die when not eating
 - **Allow Random Movement**: When enabled, cells can move to random adjacent spaces (empty or with non-consumable food) when they can't eat, swapping positions with food if present
+- **Cannibal Mode**: When enabled, removes all food and allows cells to consume each other, creating new cells instead of leaving food behind
 - **Delay** (10+ ms): Time between simulation ticks when running continuously
 
 ### Steps to Run
@@ -97,7 +110,7 @@ A modular TypeScript application that simulates cells consuming food on a grid w
    - **Step**: Execute one simulation tick manually
    - **Start**: Begin continuous simulation at the specified delay (runs until all cells die or manually stopped)
    - **Stop**: Pause the continuous simulation
-   - **Restart**: Regenerate the grid with new random positions using current settings
+   - **Reset**: Regenerate the grid with new random positions using current settings
 4. Monitor the tick counter and status messages for simulation state
 
 ### Tips
