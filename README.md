@@ -2,6 +2,8 @@
 
 A modular TypeScript application that simulates cells consuming food on a grid with an energy-based survival system.
 
+🎮 **[Try the live demo](https://number-cells-simulation.enlighten-media.net/)**
+
 ## Features
 
 - **Configurable Grid**: Set custom height, width, food count, and cell count
