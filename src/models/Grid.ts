@@ -1,0 +1,124 @@
+import { Cell } from './Cell';
+import { Food, Position } from './Food';
+
+export type GridEntity = Cell | Food | null;
+
+export class Grid {
+  private grid: GridEntity[][];
+
+  constructor(public width: number, public height: number) {
+    this.grid = Array(height)
+      .fill(null)
+      .map(() => Array(width).fill(null));
+  }
+
+  /**
+   * Initializes the grid with random food and cells
+   */
+  initialize(foodCount: number, cellCount: number): void {
+    if (foodCount + cellCount > this.width * this.height) {
+      throw new Error('Too many entities for grid size');
+    }
+
+    // Clear grid
+    this.grid = Array(this.height)
+      .fill(null)
+      .map(() => Array(this.width).fill(null));
+
+    const availablePositions: Position[] = [];
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        availablePositions.push({ x, y });
+      }
+    }
+
+    // Shuffle positions
+    this.shuffleArray(availablePositions);
+
+    // Place food
+    for (let i = 0; i < foodCount; i++) {
+      const pos = availablePositions[i];
+      const value = Math.floor(Math.random() * 10);
+      this.grid[pos.y][pos.x] = new Food(pos, value);
+    }
+
+    // Place cells
+    for (let i = 0; i < cellCount; i++) {
+      const pos = availablePositions[foodCount + i];
+      const value = Math.floor(Math.random() * 10);
+      this.grid[pos.y][pos.x] = new Cell(pos, value);
+    }
+  }
+
+  private shuffleArray<T>(array: T[]): void {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  getEntity(x: number, y: number): GridEntity {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+      return null;
+    }
+    return this.grid[y][x];
+  }
+
+  setEntity(x: number, y: number, entity: GridEntity): void {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+      return;
+    }
+    if (entity) {
+      entity.position = { x, y };
+    }
+    this.grid[y][x] = entity;
+  }
+
+  /**
+   * Gets adjacent positions (up, down, left, right)
+   */
+  getAdjacentPositions(pos: Position): Position[] {
+    const adjacent: Position[] = [
+      { x: pos.x, y: pos.y - 1 }, // up
+      { x: pos.x + 1, y: pos.y }, // right
+      { x: pos.x, y: pos.y + 1 }, // down
+      { x: pos.x - 1, y: pos.y }, // left
+    ];
+
+    return adjacent.filter((p) => p.x >= 0 && p.x < this.width && p.y >= 0 && p.y < this.height);
+  }
+
+  /**
+   * Gets all cells in the grid
+   */
+  getAllCells(): Cell[] {
+    const cells: Cell[] = [];
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const entity = this.grid[y][x];
+        if (entity instanceof Cell) {
+          cells.push(entity);
+        }
+      }
+    }
+    return cells;
+  }
+
+  /**
+   * Creates a copy of the current grid state
+   */
+  clone(): Grid {
+    const newGrid = new Grid(this.width, this.height);
+    for (let y = 0; y < this.height; y++) {
+      for (let x = 0; x < this.width; x++) {
+        const entity = this.grid[y][x];
+        if (entity instanceof Cell) {
+          newGrid.grid[y][x] = new Cell({ x, y }, entity.value);
+        } else if (entity instanceof Food) {
+          newGrid.grid[y][x] = new Food({ x, y }, entity.value);
+        }
+      }
+    }
+    return newGrid;
+  }
+}

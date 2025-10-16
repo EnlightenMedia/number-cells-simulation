@@ -1,0 +1,26 @@
+{
+  "name": "number-cell",
+  "version": "1.0.0",
+  "description": "A modular TypeScript app for cell and food grid simulation",
+  "main": "dist/bundle.js",
+  "scripts": {
+    "build": "webpack --mode production",
+    "dev": "webpack serve --mode development --open",
+    "watch": "webpack --mode development --watch"
+  },
+  "keywords": [
+    "typescript",
+    "simulation",
+    "grid"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.2.2",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1",
+    "ts-loader": "^9.5.0",
+    "html-webpack-plugin": "^5.5.3"
+  }
+}
