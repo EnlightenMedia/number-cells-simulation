@@ -152,8 +152,10 @@ export class SimulationEngine {
 
     this.isRunning = true;
     this.intervalId = window.setInterval(() => {
-      const anyMoved = this.tick();
-      if (!anyMoved) {
+      this.tick();
+      // Check if there are any cells left alive
+      const remainingCells = this.grid.getAllCells();
+      if (remainingCells.length === 0) {
         this.stop();
         if (this.onNoMovesAvailable) {
           this.onNoMovesAvailable();

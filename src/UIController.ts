@@ -286,7 +286,7 @@ export class UIController {
 
   private handleNoMovesAvailable(): void {
     this.updateControlStates();
-    this.showStatus('Simulation stopped - No more moves available', 'info');
+    this.showStatus('Simulation stopped - No cells remaining', 'info');
   }
 
   private showStatus(message: string, type: 'success' | 'error' | 'info'): void {

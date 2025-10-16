@@ -38,6 +38,10 @@ export class Grid {
     // Place food
     for (let i = 0; i < foodCount; i++) {
       const pos = availablePositions[i];
+      // Verify position is empty before placing
+      if (this.grid[pos.y][pos.x] !== null) {
+        throw new Error(`Position (${pos.x}, ${pos.y}) is already occupied when placing food`);
+      }
       const value = Math.floor(Math.random() * (maxValue + 1));
       this.grid[pos.y][pos.x] = new Food(pos, value, maxValue);
     }
@@ -45,6 +49,10 @@ export class Grid {
     // Place cells
     for (let i = 0; i < cellCount; i++) {
       const pos = availablePositions[foodCount + i];
+      // Verify position is empty before placing
+      if (this.grid[pos.y][pos.x] !== null) {
+        throw new Error(`Position (${pos.x}, ${pos.y}) is already occupied when placing cell`);
+      }
       const value = Math.floor(Math.random() * (maxValue + 1));
       this.grid[pos.y][pos.x] = new Cell(pos, value, maxValue, energy);
     }
