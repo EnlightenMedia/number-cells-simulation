@@ -7,9 +7,16 @@ export class SimulationEngine {
   private isRunning: boolean = false;
   private intervalId: number | null = null;
   private tickCount: number = 0;
+  private cellsDie: boolean;
 
-  constructor(grid: Grid, private onUpdate: () => void, private onNoMovesAvailable?: () => void) {
+  constructor(
+    grid: Grid,
+    private onUpdate: () => void,
+    private onNoMovesAvailable?: () => void,
+    cellsDie: boolean = false,
+  ) {
     this.grid = grid;
+    this.cellsDie = cellsDie;
   }
 
   setGrid(grid: Grid): void {
@@ -48,6 +55,13 @@ export class SimulationEngine {
       console.log(`    Result: ${moved ? 'MOVED' : 'no move'}`);
       if (moved) {
         anyMoved = true;
+      } else if (this.cellsDie) {
+        // Remove cell that didn't eat (if it's still at its original position)
+        const currentEntity = this.grid.getEntity(position.x, position.y);
+        if (currentEntity === cell) {
+          console.log(`    Cell starved and died at (${position.x},${position.y})`);
+          this.grid.setEntity(position.x, position.y, null);
+        }
       }
     }
 

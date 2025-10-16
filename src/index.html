@@ -64,7 +64,7 @@
             font-size: 0.95em;
         }
 
-        .input-field input {
+        .input-field input[type="number"] {
             padding: 10px 15px;
             border: 2px solid #ced4da;
             border-radius: 6px;
@@ -72,10 +72,28 @@
             transition: all 0.3s ease;
         }
 
-        .input-field input:focus {
+        .input-field input[type="number"]:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-field.checkbox {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-field.checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .input-field.checkbox label {
+            margin-bottom: 0;
+            cursor: pointer;
         }
 
         .button-group {
@@ -327,6 +345,10 @@
                 <div class="input-field">
                     <label for="maxValue">Max Value:</label>
                     <input type="number" id="maxValue" value="9" min="1" max="99">
+                </div>
+                <div class="input-field checkbox">
+                    <input type="checkbox" id="cellsDie" checked>
+                    <label for="cellsDie">Cells Die if Starved</label>
                 </div>
                 <div class="input-field">
                     <label for="delay">Delay (ms):</label>

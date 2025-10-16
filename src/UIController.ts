@@ -13,6 +13,7 @@ export class UIController {
   private foodInput: HTMLInputElement;
   private cellsInput: HTMLInputElement;
   private maxValueInput: HTMLInputElement;
+  private cellsDieInput: HTMLInputElement;
   private delayInput: HTMLInputElement;
 
   // Button elements
@@ -34,6 +35,7 @@ export class UIController {
     this.foodInput = document.getElementById('food') as HTMLInputElement;
     this.cellsInput = document.getElementById('cells') as HTMLInputElement;
     this.maxValueInput = document.getElementById('maxValue') as HTMLInputElement;
+    this.cellsDieInput = document.getElementById('cellsDie') as HTMLInputElement;
     this.delayInput = document.getElementById('delay') as HTMLInputElement;
 
     // Get button elements
@@ -106,6 +108,7 @@ export class UIController {
         this.grid,
         () => this.render(),
         () => this.handleNoMovesAvailable(),
+        this.cellsDieInput.checked,
       );
 
       this.render();
