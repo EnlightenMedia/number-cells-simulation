@@ -285,7 +285,7 @@ export class UIController {
 
     this.render();
     this.updateControlStates();
-    this.showStatus('Simulation restarted with current settings', 'success');
+    this.showStatus('Simulation reset with current settings', 'success');
   }
 
   private render(): void {
