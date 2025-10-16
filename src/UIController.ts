@@ -333,11 +333,11 @@ export class UIController {
     // Update tick counter and entity counts
     if (this.engine) {
       this.tickCounter.textContent = `Tick: ${this.engine.getTickCount()}`;
-      
+
       // Count food and cells
       const foodCount = this.grid.getAllFood().length;
       const cellCount = this.grid.getAllCells().length;
-      
+
       this.foodCounter.textContent = `Food: ${foodCount}`;
       this.cellCounter.textContent = `Cells: ${cellCount}`;
     }
