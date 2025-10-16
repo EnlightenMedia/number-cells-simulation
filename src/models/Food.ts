@@ -4,9 +4,9 @@ export interface Position {
 }
 
 export class Food {
-  constructor(public position: Position, public value: number) {
-    if (value < 0 || value > 9) {
-      throw new Error('Food value must be between 0 and 9');
+  constructor(public position: Position, public value: number, public maxValue: number = 9) {
+    if (value < 0 || value > maxValue) {
+      throw new Error(`Food value must be between 0 and ${maxValue}`);
     }
   }
 }

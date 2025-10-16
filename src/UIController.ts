@@ -12,6 +12,7 @@ export class UIController {
   private widthInput: HTMLInputElement;
   private foodInput: HTMLInputElement;
   private cellsInput: HTMLInputElement;
+  private maxValueInput: HTMLInputElement;
   private delayInput: HTMLInputElement;
 
   // Button elements
@@ -32,6 +33,7 @@ export class UIController {
     this.widthInput = document.getElementById('width') as HTMLInputElement;
     this.foodInput = document.getElementById('food') as HTMLInputElement;
     this.cellsInput = document.getElementById('cells') as HTMLInputElement;
+    this.maxValueInput = document.getElementById('maxValue') as HTMLInputElement;
     this.delayInput = document.getElementById('delay') as HTMLInputElement;
 
     // Get button elements
@@ -63,6 +65,7 @@ export class UIController {
     const width = parseInt(this.widthInput.value);
     const foodCount = parseInt(this.foodInput.value);
     const cellCount = parseInt(this.cellsInput.value);
+    const maxValue = parseInt(this.maxValueInput.value);
 
     // Validation
     if (isNaN(height) || height < 1 || height > 50) {
@@ -81,6 +84,10 @@ export class UIController {
       this.showStatus('Cell count must be a non-negative number', 'error');
       return;
     }
+    if (isNaN(maxValue) || maxValue < 1 || maxValue > 99) {
+      this.showStatus('Max value must be between 1 and 99', 'error');
+      return;
+    }
     if (foodCount + cellCount > height * width) {
       this.showStatus('Too many entities for grid size', 'error');
       return;
@@ -89,7 +96,7 @@ export class UIController {
     try {
       // Create new grid
       this.grid = new Grid(width, height);
-      this.grid.initialize(foodCount, cellCount);
+      this.grid.initialize(foodCount, cellCount, maxValue);
 
       // Create new engine
       if (this.engine) {
@@ -157,8 +164,9 @@ export class UIController {
     this.engine.stop();
     const foodCount = parseInt(this.foodInput.value);
     const cellCount = parseInt(this.cellsInput.value);
+    const maxValue = parseInt(this.maxValueInput.value);
 
-    this.grid.initialize(foodCount, cellCount);
+    this.grid.initialize(foodCount, cellCount, maxValue);
     this.engine.reset();
     this.engine.setGrid(this.grid);
     this.render();

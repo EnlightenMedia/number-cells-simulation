@@ -33,11 +33,20 @@ export class SimulationEngine {
     const cells = this.grid.getAllCells();
     let anyMoved = false;
 
-    // Shuffle cells to randomize order of movement
-    this.shuffleArray(cells);
+    console.log(`Tick ${this.tickCount}: Found ${cells.length} cells`);
 
-    for (const cell of cells) {
-      if (this.processCellMovement(cell)) {
+    // Capture cell positions before any movement
+    const cellPositions = cells.map((cell) => ({ cell, position: { ...cell.position } }));
+
+    // Shuffle to randomize order of movement
+    this.shuffleArray(cellPositions);
+
+    for (let i = 0; i < cellPositions.length; i++) {
+      const { cell, position } = cellPositions[i];
+      console.log(`  Processing cell ${i}: value=${cell.value} at (${position.x},${position.y})`);
+      const moved = this.processCellMovement(cell, position);
+      console.log(`    Result: ${moved ? 'MOVED' : 'no move'}`);
+      if (moved) {
         anyMoved = true;
       }
     }
@@ -51,29 +60,44 @@ export class SimulationEngine {
    * Processes movement for a single cell
    * Returns true if the cell moved, false otherwise
    */
-  private processCellMovement(cell: Cell): boolean {
-    const adjacentPositions = this.grid.getAdjacentPositions(cell.position);
+  private processCellMovement(cell: Cell, originalPosition: { x: number; y: number }): boolean {
+    // Verify the cell is still at the position we expect (it might have been moved by another cell)
+    const currentEntity = this.grid.getEntity(originalPosition.x, originalPosition.y);
+    if (currentEntity !== cell) {
+      // This cell has already been moved or consumed
+      return false;
+    }
+
+    const adjacentPositions = this.grid.getAdjacentPositions(originalPosition);
     const validMoves: Food[] = [];
 
     // Find all adjacent food that this cell can consume
     for (const pos of adjacentPositions) {
       const entity = this.grid.getEntity(pos.x, pos.y);
       if (entity instanceof Food && cell.canConsume(entity.value)) {
+        console.log(`      Found consumable food: value=${entity.value} at (${pos.x},${pos.y})`);
         validMoves.push(entity);
       }
     }
 
     if (validMoves.length === 0) {
+      console.log(`      No valid moves found for cell value=${cell.value}`);
       return false;
     }
 
     // Randomly select one valid move
     const targetFood = validMoves[Math.floor(Math.random() * validMoves.length)];
-    const oldPosition = { ...cell.position };
+    const oldPosition = { ...originalPosition };
     const newPosition = { ...targetFood.position };
 
+    console.log(
+      `      Moving from (${oldPosition.x},${oldPosition.y}) to (${newPosition.x},${
+        newPosition.y
+      }), eating food ${targetFood.value}, leaving food ${cell.getLeftBehindFoodValue()}`,
+    );
+
     // Create new food to leave behind
-    const leftBehindFood = new Food(oldPosition, cell.getLeftBehindFoodValue());
+    const leftBehindFood = new Food(oldPosition, cell.getLeftBehindFoodValue(), cell.maxValue);
 
     // Move cell to food position
     this.grid.setEntity(newPosition.x, newPosition.y, cell);
