@@ -49,8 +49,6 @@ export class SimulationEngine {
     const cells = this.grid.getAllCells();
     let anyMoved = false;
 
-    console.log(`Tick ${this.tickCount}: Found ${cells.length} cells`);
-
     // Capture cell positions before any movement and create a set to track consumed cells
     const cellPositions = cells.map((cell) => ({ cell, position: { ...cell.position } }));
     const consumedCells = new Set<Cell>();
@@ -63,13 +61,9 @@ export class SimulationEngine {
 
       // Skip if this cell has been consumed by another cell in this tick
       if (consumedCells.has(cell)) {
-        console.log(`  Processing cell ${i}: SKIPPED (consumed by another cell)`);
         continue;
       }
-
-      console.log(`  Processing cell ${i}: value=${cell.value} at (${position.x},${position.y})`);
       const { moved, consumedCell } = this.processCellMovement(cell, position);
-      console.log(`    Result: ${moved ? 'MOVED AND ATE' : 'no move'}`);
 
       // Track the consumed cell so it can't act this tick
       if (consumedCell) {
@@ -84,7 +78,6 @@ export class SimulationEngine {
         if (this.allowRandomMove && cell.isAlive()) {
           movedRandomly = this.processRandomMovement(cell, position);
           if (movedRandomly) {
-            console.log(`    Cell moved randomly`);
             anyMoved = true;
           }
         }
@@ -92,12 +85,8 @@ export class SimulationEngine {
         // Decrease energy if cell didn't eat (regardless of whether it moved randomly)
         if (this.cellsDie && !moved) {
           cell.decreaseEnergy();
-          console.log(
-            `    Cell energy decreased to ${cell.energy} at (${cell.position.x},${cell.position.y})`,
-          );
           // Remove cell if energy reaches zero
           if (!cell.isAlive()) {
-            console.log(`    Cell died at (${cell.position.x},${cell.position.y})`);
             this.grid.setEntity(cell.position.x, cell.position.y, null);
           }
         }
@@ -121,7 +110,6 @@ export class SimulationEngine {
     const currentEntity = this.grid.getEntity(originalPosition.x, originalPosition.y);
     if (currentEntity !== cell) {
       // This cell has already been moved or consumed
-      console.log(`      Cell is no longer at original position - skipping`);
       return { moved: false, consumedCell: null };
     }
 
@@ -130,7 +118,6 @@ export class SimulationEngine {
     if (this.cannibalMode) {
       const allCurrentCells = this.grid.getAllCells();
       if (!allCurrentCells.includes(cell)) {
-        console.log(`      Cell has been consumed - skipping`);
         return { moved: false, consumedCell: null };
       }
     }
@@ -142,7 +129,6 @@ export class SimulationEngine {
     for (const pos of adjacentPositions) {
       const entity = this.grid.getEntity(pos.x, pos.y);
       if (entity instanceof Food && cell.canConsume(entity.value)) {
-        console.log(`      Found consumable food: value=${entity.value} at (${pos.x},${pos.y})`);
         validMoves.push({ entity, position: pos });
       } else if (
         this.cannibalMode &&
@@ -150,13 +136,11 @@ export class SimulationEngine {
         entity !== cell &&
         cell.canConsume(entity.value)
       ) {
-        console.log(`      Found consumable cell: value=${entity.value} at (${pos.x},${pos.y})`);
         validMoves.push({ entity, position: pos });
       }
     }
 
     if (validMoves.length === 0) {
-      console.log(`      No valid moves found for cell value=${cell.value}`);
       return { moved: false, consumedCell: null };
     }
 
@@ -165,14 +149,6 @@ export class SimulationEngine {
     const oldPosition = { ...originalPosition };
     const newPosition = { ...target.position };
     const leftBehindValue = cell.getLeftBehindFoodValue();
-
-    console.log(
-      `      Moving from (${oldPosition.x},${oldPosition.y}) to (${newPosition.x},${
-        newPosition.y
-      }), eating ${target.entity instanceof Cell ? 'cell' : 'food'} ${
-        target.entity.value
-      }, leaving ${this.cannibalMode ? 'cell' : 'food'} ${leftBehindValue}`,
-    );
 
     // Restore cell energy after eating
     cell.restoreEnergy(this.initialEnergy);
@@ -231,12 +207,6 @@ export class SimulationEngine {
 
     // Randomly select one valid position
     const target = validPositions[Math.floor(Math.random() * validPositions.length)];
-
-    console.log(
-      `      Moving randomly from (${originalPosition.x},${originalPosition.y}) to (${target.x},${
-        target.y
-      })${target.hasFood ? ' (swapping with food)' : ''}`,
-    );
 
     // Move cell to target position
     this.grid.setEntity(target.x, target.y, cell);

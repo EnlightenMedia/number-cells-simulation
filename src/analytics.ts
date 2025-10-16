@@ -18,13 +18,9 @@ export function track(eventName: string, metadata?: Record<string, any>): void {
   if (typeof window !== 'undefined' && window.sa_event) {
     try {
       window.sa_event(eventName, metadata);
-      console.log('[Simple Analytics]', eventName, metadata);
     } catch (e) {
       console.warn('Simple Analytics tracking failed:', e);
     }
-  } else {
-    // Fallback logging when Simple Analytics is not loaded
-    console.log('[Analytics]', eventName, metadata);
   }
 }
 
