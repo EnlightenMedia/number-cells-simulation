@@ -1,34 +1,15 @@
 /**
- * Simple Analytics integration for event tracking
- * Docs: https://docs.simpleanalytics.com/events
+ * Application-specific analytics tracking
+ * Uses the generic Simple Analytics module for the core functionality
  */
 
-// Extend window type for Simple Analytics
-declare global {
-  interface Window {
-    sa_event?: (eventName: string, metadata?: Record<string, any>) => void;
-  }
-}
-
-/**
- * Track an event using Simple Analytics
- */
-export function track(eventName: string, metadata?: Record<string, any>): void {
-  // Send to Simple Analytics if available
-  if (typeof window !== 'undefined' && window.sa_event) {
-    try {
-      window.sa_event(eventName, metadata);
-    } catch (e) {
-      console.warn('Simple Analytics tracking failed:', e);
-    }
-  }
-}
+import { track, trackButtonClick as genericTrackButtonClick } from './simpleAnalytics';
 
 /**
  * Track button click
  */
 export function trackButtonClick(buttonName: string): void {
-  track('button_click', { button: buttonName });
+  genericTrackButtonClick(buttonName);
 }
 
 /**
@@ -66,7 +47,9 @@ export function trackHelpClosed(method: 'close_button' | 'backdrop_click' | 'esc
   track('help_closed', { method });
 }
 
-// Create analytics object for backwards compatibility
+/**
+ * Analytics object for convenient access to all tracking functions
+ */
 export const analytics = {
   track,
   trackButtonClick,
